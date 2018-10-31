@@ -24,16 +24,15 @@
 <body>
     <canvas id="renderCanvas"></canvas>
     <script>
-        var maxInterval = 4;  // not to exceed 6
+        var maxInterval;  // not to exceed 6
         const initialScale = 243*3;
         const remove = [22, 16, 14, 13, 12, 10, 4];
         const scales = [243, 81, 27, 9, 3 ,1, 1/3];
         const cloneScales = [1, 1/3, 1/9, 1/27, 1/81, 1/243];
-        var objectCount = 0;
         var initialMeshes = [];
-        var clone;
+        // var clone;
         var template;
-        var final;
+        // var final;
         var camera;
         var direction = 1;
 
@@ -53,34 +52,51 @@
                 camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 45, -150), scene);
 
                 // target the camera to scene origin
-                camera.setTarget(new BABYLON.Vector3(0,45,-200));
+                camera.setTarget(new BABYLON.Vector3(0,0,-500));
 
                 // attach the camera to the canvas
                 camera.attachControl(canvas, false);
 
-                // create a basic light, aiming 0,1,0 - meaning, to the sky
-                var light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
-                light.intensity = .7;
-                var dLight = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(-5, -5, -1.5), scene);
- 
+                // create basic lights, aiming 0,1,0 - meaning, to the sky
+                // var hlight1 = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(1,1,0), scene);
+                // var hlight2 = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
+                var hlight3 = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,1), scene);
+
+                // hlight1.intensity = .7;
+                // hlight2.intensity = .5;
+                hlight3.intensity = .7;
+
+                var plight1 = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(600, 600, 600), scene);
+                var plight2 = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(-600, -600, -600), scene);
+                var plight3 = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(0, 0, 0), scene);
+
+                plight1.intensity = .5;
+                plight2.intensity = .7;
+                plight3.intensity = .6;
+
+                plight1.diffuse = new BABYLON.Color3(1, .5, .5);
+                plight2.diffuse = new BABYLON.Color3(.5, 1, .5);
+                plight3.diffuse = new BABYLON.Color3(.2, .2, 1);
+                 
                 var greenMat = new BABYLON.StandardMaterial("green", scene);
                 greenMat.diffuseColor = BABYLON.Color3.Green();
-                // greenMat.bumpTexture = new BABYLON.Texture("normal.png", scene);
 
+                var mat1 = new BABYLON.StandardMaterial("mat1", scene);
+                mat1.diffuseTexture = new BABYLON.Texture("./metal1/Metal_Grill_001_COLOR.jpg", scene);
+                // mat1.bumpTexture = new BABYLON.Texture("./metal1/Metal_Grill_001_NORM.jpg", scene);
+	
+                // Create initial sponge to use as a 'block' template.  This seems to help increase complexity.
+                maxInterval = 4;
                 calculateCenters(new BABYLON.Vector3(0,0,0), 1, scene, greenMat, true);
 
                 template = BABYLON.Mesh.MergeMeshes(initialMeshes, true, true);
                 template.position = new BABYLON.Vector3(0,0,-1050);
                 initialMeshes.forEach(m => m.dispose());
-                // initialMeshes = [];
+                initialMeshes = [];
 
+                // Create the final sponge using the previous template as the 'block'
                 maxInterval = 3;
-                calculateCenters(new BABYLON.Vector3(0,0,0), 1, scene, greenMat, false);
-
-                // final = BABYLON.Mesh.MergeMeshes(initialMeshes, true, true);
-                // final.position = new BABYLON.Vector3(0,0,0);
-                // initialMeshes.forEach(m => m.dispose());
-                // initialMeshes = [];
+                calculateCenters(new BABYLON.Vector3(0,0,0), 1, scene, mat1, false);
 
                 // return the created scene
                 return scene;
@@ -92,9 +108,8 @@
             // run the render loop
             engine.runRenderLoop(function(){
                 camera.position.z +=.2*direction; 
-                if (camera.position.z > 500) direction*=-1;
-                if (camera.position.z < -150)  direction*=-1;
-                console.log(camera.position);
+                if (camera.position.z > 420) { direction*=-1; camera.position.z = 420; }
+                if (camera.position.z < -200) { direction*=-1; camera.position.z = -200; }
                 scene.render();
             });
 
@@ -104,34 +119,43 @@
             });
         });
 
-        function calculateCenters(center, i, scene, mat, initial){
-            let myScale = scales[i-1];
+        // Recursively calculate 27 centers of surrounding blocks
+        // Initial is true when building  the initial template
+        function calculateCenters(center, interval, scene, mat, initial){
+            let myScale = scales[interval-1];
             let box;
 
-            if (i === maxInterval){
+            // If complexity is reached then render the block or the clone template depending on initial run
+            if (interval === maxInterval){
                 if (initial){
+                    // If initial then we are building the template so we use a normal block
                     box = BABYLON.MeshBuilder.CreateBox("box", {height: myScale, width: myScale, depth: myScale}, scene);
+                    initialMeshes.push(box);
                 }
                 else {
+                    // If not initial run then use the clone template
                     box = template.clone("clone");                    
-                    box.scaling.x = cloneScales[i-1];
-                    box.scaling.y = cloneScales[i-1];
-                    box.scaling.z = cloneScales[i-1];
+                    box.scaling.x = cloneScales[interval-1];
+                    box.scaling.y = cloneScales[interval-1];
+                    box.scaling.z = cloneScales[interval-1];
                 }
                 box.position = center;
                 box.material = mat;
-                initialMeshes.push(box);
                 return;
             }
 
-            let s3 = scales[i];
+            // Get the scale for this interval
+            let s3 = scales[interval];
+            // Count is the location to determine the removal
             let count = 0;
 
+            // Calculate the new block centers ignoring the central blocks
             for (let y = center.y-s3; y <= center.y+s3; y+=s3)
             for (let z = center.z-s3; z <= center.z+s3; z+=s3)
             for (let x = center.x-s3; x <= center.x+s3; x+=s3){
                 if (!remove.includes(count))
-                    calculateCenters(new BABYLON.Vector3(x,y,z), i+1, scene, mat, initial);
+                    // Recurse using the new calculated centers unless they are the removed ones
+                    calculateCenters(new BABYLON.Vector3(x,y,z), interval+1, scene, mat, initial);
                 count++;
             }
         }
