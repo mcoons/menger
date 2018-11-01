@@ -2,9 +2,8 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
-    <title>Babylon - Getting Started</title>
-    <!--- Link to the last version of BabylonJS --->
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <title>Menger Sponge - 1</title>
+    <script src="babylon.js"></script>
     <style>
         html, body {
             overflow: hidden;
@@ -30,9 +29,7 @@
         const scales = [243, 81, 27, 9, 3 ,1, 1/3];
         const cloneScales = [1, 1/3, 1/9, 1/27, 1/81, 1/243];
         var initialMeshes = [];
-        // var clone;
         var template;
-        // var final;
         var camera;
         var direction = 1;
 
@@ -50,30 +47,21 @@
 
                 // create a FreeCamera, and set its position to (x:0, y:5, z:-10)
                 camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 45, -150), scene);
-
-                // target the camera to scene origin
+                // target the camera
                 camera.setTarget(new BABYLON.Vector3(0,0,-500));
-
                 // attach the camera to the canvas
                 camera.attachControl(canvas, false);
 
                 // create basic lights, aiming 0,1,0 - meaning, to the sky
-                // var hlight1 = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(1,1,0), scene);
-                // var hlight2 = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,0), scene);
-                var hlight3 = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,1), scene);
-
-                // hlight1.intensity = .7;
-                // hlight2.intensity = .5;
-                hlight3.intensity = .7;
+                var hlight = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0,1,1), scene);
+                hlight.intensity = .7;
 
                 var plight1 = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(600, 600, 600), scene);
                 var plight2 = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(-600, -600, -600), scene);
                 var plight3 = new BABYLON.PointLight("pointLight", new BABYLON.Vector3(0, 0, 0), scene);
-
                 plight1.intensity = .5;
                 plight2.intensity = .7;
                 plight3.intensity = .6;
-
                 plight1.diffuse = new BABYLON.Color3(1, .5, .5);
                 plight2.diffuse = new BABYLON.Color3(.5, 1, .5);
                 plight3.diffuse = new BABYLON.Color3(.2, .2, 1);
@@ -83,7 +71,6 @@
 
                 var mat1 = new BABYLON.StandardMaterial("mat1", scene);
                 mat1.diffuseTexture = new BABYLON.Texture("./metal1/Metal_Grill_001_COLOR.jpg", scene);
-                // mat1.bumpTexture = new BABYLON.Texture("./metal1/Metal_Grill_001_NORM.jpg", scene);
 	
                 // Create initial sponge to use as a 'block' template.  This seems to help increase complexity.
                 maxInterval = 3;
@@ -146,7 +133,7 @@
 
             // Get the scale for this interval
             let s3 = scales[interval];
-            // Count is the location to determine the removal
+            // Count is the 'location'of the block to determine the removal
             let count = 0;
 
             // Calculate the new block centers ignoring the central blocks
@@ -159,7 +146,6 @@
                 count++;
             }
         }
-
     </script>
 </body>
 </html>
