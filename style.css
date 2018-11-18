@@ -18,3 +18,18 @@ html, body {
     position:absolute;
     padding:20px;
 }
+
+li, h3 {
+    margin: 2px;
+}
+
+img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#calculating {
+    text-align: center;
+
+}
