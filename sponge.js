@@ -1,3 +1,7 @@
+if (BABYLON.Engine.isSupported()) {
+
+
+
 window.onload = function() {
    
         var maxInterval = 1;  
@@ -111,3 +115,6 @@ window.onload = function() {
         // });
 }
 
+}else{
+    alert("WebGL not supported in this browser.");
+}
